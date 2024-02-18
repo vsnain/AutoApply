@@ -1,0 +1,20 @@
+var simulateMouseEvent = function(element, eventName, coordX, coordY) {
+    element.dispatchEvent(new MouseEvent(eventName, {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: coordX,
+      clientY: coordY,
+      button: 0
+    }));
+  };
+  
+async function moveMouseTo(element) {
+    const rect = element.getBoundingClientRect();
+    const coordX = rect.left + (rect.right - rect.left) / 2;
+    const coordY = rect.top + (rect.bottom - rect.top) / 2;
+    
+    simulateMouseEvent(element, "mousedown", coordX, coordY);
+    simulateMouseEvent(element, "mouseup", coordX, coordY);
+    simulateMouseEvent(element, "click", coordX, coordY);
+}

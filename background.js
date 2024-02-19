@@ -9,7 +9,7 @@ async function getActiveTab() {
 async function openJobTab(jobUrl) {
     
     const currentTab = await getActiveTab();
-
+    
     try {
         const jobTab = await chrome.tabs.create({url: jobUrl});
         
@@ -21,13 +21,24 @@ async function openJobTab(jobUrl) {
     }
 }
 
-chrome.runtime.onMessage.addListener(async ({type, jobUrl}, sender) => {
+
+chrome.runtime.onMessage.addListener(async ({type, url}, sender, sendResponse) => {
     
     if (type === 'openJobTab') {
         chrome.storage.local.get('url', async ({url}) => {
-            console.log("Opening new tab", url);
+            console.log("Opening tab", url);
             await openJobTab(url); 
           })
         
     }
+    else if (type === 'closeTab') {
+        chrome.tabs.remove(sender.tab.id);
+    }
+    else if (type == "tabID") {
+        chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+            sendResponse({tab: tabs[0].id});
+        });
+        
+     }
+   
 });

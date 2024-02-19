@@ -2,12 +2,14 @@ async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
 async function openJobInNewTab(jobElement) {
     let jobTab; // Declare the jobTab variable
 
     try {
         // Find the anchor element inside the job element
-        const jobAnchor = jobElement.querySelector('a.jcs-JobTitle');
+        const jobAnchor = jobElement.querySelector('.jcs-JobTitle');
+        // const jobAnchor = jobElement.querySelector('a[class*="jcs-JobTitle"]');
 
         // Check if the anchor element exists
         if (!jobAnchor) {
@@ -18,10 +20,11 @@ async function openJobInNewTab(jobElement) {
         // Get the URL of the job listing from the anchor element
         const jobUrl = jobAnchor.getAttribute('href');
 
-        // Open the job listing in a new tab and store the reference to the tab
-        jobTab = window.open(jobUrl, '_blank');
-
         
+        
+        jobTab = window.open(jobUrl, '_blank');
+        
+
         // Wait for the job listing page to fully load
         await new Promise(resolve => {
             jobTab.addEventListener('load', resolve);
@@ -29,59 +32,13 @@ async function openJobInNewTab(jobElement) {
 
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Find the apply button on the job listing page
-        const applyButton = jobTab.document.querySelector('#applyButtonLinkContainer > div > div > button');
+        const applyButton = jobTab.document.querySelector('[aria-label^="Apply now"]');
         
         await moveMouseTo(applyButton);
 
-        const url = applyButton.getAttribute('href');
-        // Check if the apply button exists
-        if (!applyButton) {
-            console.log('Apply button not found on the job listing page.');
-            return; // Exit the function
-        }
-        console.log(url);
-        
-
-        if (url.includes("indeed")) {
-            chrome.storage.local.set({ url });
-        
-            chrome.runtime.sendMessage({
-                type: 'openJobTab',
-                url
-            });
-        
-            // Define an async function to handle the tab loaded event
-            const handleTabLoaded = async (message, sender) => {
-                if (message.type === 'tabLoaded') {
-                    try {
-                        // Execute content script in the new tab to find the label element
-                        chrome.tabs.executeScript(sender.tab.id, {
-                            code: `document.querySelector('#ihl-useId-indeed-theme-provider-guwgai-1-file-resume > label')`
-                        }, function(results) {
-                            if (chrome.runtime.lastError) {
-                                console.error(chrome.runtime.lastError.message);
-                            } else {
-                                console.log('Label found:', results[0]);
-                                moveMouseTo(results[0]); // Call moveMouseTo without await
-                            }
-                        });
-                    } catch (error) {
-                        console.error('An error occurred:', error);
-                    }
-                }
-            };
-        
-            // Register the handleTabLoaded function as a listener for the tabLoaded event
-            chrome.runtime.onMessage.addListener(handleTabLoaded);
-        } else {
-            console.log("URL does not contain 'indeed'. Ignoring...");
-        }
-        
-        
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         
-
         
     } catch (error) {
         console.error('An error occurred while opening a job listing:', error);
@@ -93,7 +50,33 @@ async function openJobInNewTab(jobElement) {
 }
 
 
+// function handleMutation(mutationsList, observer, jobTab) {
+    
 
+//     mutationsList.forEach(mutation => {
+//         if (mutation.type === 'childList') {
+//             // Check if the form element is added to the DOM
+//             const form = document.querySelector('form[action="https://smartapply.indeed.com/beta/indeedapply/postresumeapply"]');
+//             if (form) {
+//                 // Extract the URL from the form's action attribute
+//                 console.log('Form element:', form);
+//                 const actionUrl = form.getAttribute('action');
+
+//                 console.log('Form action URL====================', actionUrl);
+                
+//                 // Open the next page with the extracted URL
+//                 window.open(actionUrl, '_blank');
+//                 observer.disconnect();
+              
+                
+//             }
+//             else{
+//                 jobTab.close();
+//             }
+            
+//         }
+//     });
+// }
 
   
 
@@ -113,8 +96,6 @@ async function moveMouseTo(element) {
     const coordX = rect.left + (rect.right - rect.left) / 2;
     const coordY = rect.top + (rect.bottom - rect.top) / 2;
     
-    console.log(`Moving mouse to (${coordX}, ${coordY})`);
-    
     simulateMouseEvent(element, "mousedown", coordX, coordY);
     simulateMouseEvent(element, "mouseup", coordX, coordY);
     simulateMouseEvent(element, "click", coordX, coordY);
@@ -131,7 +112,7 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
         console.log(`Found ${jobElements.length} job elements`);
         
         // Iterate over each job element 
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 3; i++) {
           const jobElement = jobElements[i];
           
           console.log(`Processing job element ${i + 1}/${jobElements.length}`);

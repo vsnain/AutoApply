@@ -32,13 +32,13 @@ chrome.runtime.onMessage.addListener(async ({type, url}, sender, sendResponse) =
         
     }
     else if (type === 'closeTab') {
-        chrome.tabs.remove(sender.tab.id);
+        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+            tabId = tabs[0].id;
+            const currentTabUrl = tabs[0].url;
+            // console.log("Printing URL");
+            // console.log(currentTabUrl);
+          });
+        chrome.tabs.remove(tabId);
     }
-    else if (type == "tabID") {
-        chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-            sendResponse({tab: tabs[0].id});
-        });
-        
-     }
    
 });

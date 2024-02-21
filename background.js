@@ -35,8 +35,6 @@ chrome.runtime.onMessage.addListener(async ({type, url}, sender, sendResponse) =
         chrome.tabs.query({active: true, currentWindow: true}, tabs => {
             tabId = tabs[0].id;
             const currentTabUrl = tabs[0].url;
-            // console.log("Printing URL");
-            // console.log(currentTabUrl);
           });
         chrome.tabs.remove(tabId);
     }

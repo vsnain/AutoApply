@@ -2,11 +2,11 @@ async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function applyJob(){
 
+async function openLinkedinJobInNewTab(jobElement){
+  console.log(jobElement);
 }
-
-async function openJobInNewTab(jobElement) {
+async function openIndeedJobInNewTab(jobElement) {
   let jobTab; // Declare the jobTab variable
 
   try {
@@ -81,23 +81,59 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
     // Check if the message action is to start execution
     if (message.action === 'startExecution') {
       sendResponse({ success: true });
-      try {
-        // Find all job elements
-        const jobElements = document.querySelectorAll('#mosaic-provider-jobcards > ul > li.css-5lfssm.eu4oa1w0');
-        console.log(`Found ${jobElements.length} job elements`);
-        
-        // Iterate over each job element 
-        for (let i = 0; i < 3; i++) {
-          const jobElement = jobElements[i];
-          console.log(`Processing job element ${i + 1}/${jobElements.length}`);
-          // Move the mouse cursor to the job element and click on it
-          await moveMouseTo(jobElement);
-          await openJobInNewTab(jobElement);
-          // Wait for 250 milliseconds
-          await delay(500);
+
+      const currentURL = window.location.href;
+        // Check if the URL contains "indeed" or "linkedin"
+
+      if (currentURL.includes("indeed")) {
+        try {
+          // Find all job elements
+          const jobElements = document.querySelectorAll('#mosaic-provider-jobcards > ul > li.css-5lfssm.eu4oa1w0');
+          console.log(`Found ${jobElements.length} job elements`);
+          
+          // Iterate over each job element 
+          for (let i = 0; i < 3; i++) {
+            const jobElement = jobElements[i];
+            console.log(`Processing job element ${i + 1}/${jobElements.length}`);
+            // Move the mouse cursor to the job element and click on it
+            await moveMouseTo(jobElement);
+            await openIndeedJobInNewTab(jobElement);
+            // Wait for 250 milliseconds
+            await delay(250);
+          }
+        } catch (error) {
+          console.error('An error occurred:', error);
         }
-      } catch (error) {
-        console.error('An error occurred:', error);
+          
+      } else if (currentURL.includes("linkedin")) {
+          // Execute linkedin script
+          console.log("Executing LinkedIn script");
+          const jobListItems = document.querySelectorAll('.jobs-search-results__list-item');
+          console.log(`Total number of job list items: ${jobListItems.length}`);
+          
+          for (const jobListItem of jobListItems) {
+              // Get the job title link
+              const jobTitleLink = jobListItem.querySelector('.job-card-container__link');
+              
+              // Check if the job title link exists
+              if (jobTitleLink) {
+                  // Click on the job title link
+                  const jobUrl = jobTitleLink.href;
+                  await moveMouseTo(jobTitleLink);
+                  // await openLinkedinJobInNewTab(jobUrl);
+                  // Wait for 250 milliseconds
+                  console.log(jobUrl);
+                  await delay(2000);
+              }
+          }
+          
+      } else {
+          console.log("URL does not match any supported platforms");
       }
+      
     }
 });
+
+
+
+

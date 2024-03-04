@@ -8,52 +8,71 @@ async function openLinkedinJobInNewTab(jobElement){
 }
 async function openIndeedJobInNewTab(jobElement) {
   let jobTab; // Declare the jobTab variable
+  // Find the span element with "Easily apply" text
+  const spanElements = jobElement.querySelectorAll('span');
 
-  try {
-      // Find the anchor element inside the job element
-      const jobAnchor = jobElement.querySelector('.jcs-JobTitle');
-      // const jobAnchor = jobElement.querySelector('a[class*="jcs-JobTitle"]');
+  let found = false;
 
-      // Check if the anchor element exists
-      if (!jobAnchor) {
-          console.log('No job anchor found in the job element:', jobElement);
-          return; // Exit the function
+  // Iterate through each span element
+  spanElements.forEach(span => {
+      // Check if the span contains "Easily apply"
+      if (span.textContent.trim() === "Easily apply") {
+          found = true;
       }
-      const jobUrl = jobAnchor.getAttribute('href');
-      jobTab = window.open(jobUrl, '_blank');
-      // Wait for the job listing page to fully load
-      await new Promise(resolve => {
-          jobTab.addEventListener('load', resolve);
-      });
+  });
 
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const applyButton = jobTab.document.querySelector('[aria-label^="Apply now"]');
-      
-      if(applyButton.hasAttribute('href')) {
-        jobTab.close();
-      } else {
-        // const applyButton = jobTab.document.querySelector('[aria-label^="Apply now"]');
-        await delay(500);
-        await moveMouseTo(applyButton);
-        await new Promise(resolve => window.addEventListener('load', resolve));
-
-        const continueButton = document.querySelector('button > span:contains("Continue")');
-        while (continueButton){
+// Check if the span element exists
+  if (found) {
+      console.log("Found: Easily apply");
+      try {
+        // Find the anchor element inside the job element
+        const jobAnchor = jobElement.querySelector('.jcs-JobTitle');
+        // const jobAnchor = jobElement.querySelector('a[class*="jcs-JobTitle"]');
+  
+        // Check if the anchor element exists
+        if (!jobAnchor) {
+            console.log('No job anchor found in the job element:', jobElement);
+            return; // Exit the function
+        }
+        const jobUrl = jobAnchor.getAttribute('href');
+        jobTab = window.open(jobUrl, '_blank');
+        // Wait for the job listing page to fully load
+        await new Promise(resolve => {
+            jobTab.addEventListener('load', resolve);
+        });
+  
+        await new Promise(resolve => setTimeout(resolve, 500));
+  
+        const applyButton = jobTab.document.querySelector('[aria-label^="Apply now"]');
+        
+        if(applyButton.hasAttribute('href')) {
+          jobTab.close();
+        } else {
+          // const applyButton = jobTab.document.querySelector('[aria-label^="Apply now"]');
+          await delay(500);
           await moveMouseTo(applyButton);
           await new Promise(resolve => window.addEventListener('load', resolve));
-          const newButton = document.querySelector('button > span:contains("Continue")');
-          continueButton = newButton;
+  
+          const continueButton = document.querySelector('button > span:contains("Continue")');
+          // while (continueButton){
+          //   await moveMouseTo(applyButton);
+          //   await new Promise(resolve => window.addEventListener('load', resolve));
+          //   const newButton = document.querySelector('button > span:contains("Continue")');
+          //   continueButton = newButton;
+          // }
         }
-      }
-      
-  } catch (error) {
-      console.error('An error occurred while opening a job listing:', error);
-      // Close the jobTab if an error occurs
-      if (jobTab) {
-          jobTab.close();
-      }
+        
+    } catch (error) {
+        console.error('An error occurred while opening a job listing:', error);
+        // Close the jobTab if an error occurs
+        if (jobTab) {
+            jobTab.close();
+        }
+    }
+  } else {
+      console.log("Not found: Easily apply");
   }
+
 }
 
 var simulateMouseEvent = function(element, eventName, coordX, coordY) {

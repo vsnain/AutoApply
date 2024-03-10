@@ -96,6 +96,8 @@ async function moveMouseTo(element) {
     simulateMouseEvent(element, "click", coordX, coordY);
 }
 
+// 
+
 chrome.runtime.onMessage.addListener(async function(message, sender, sendResponse) {
     // Check if the message action is to start execution
     if (message.action === 'startExecution') {
@@ -148,9 +150,14 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
           
       } else {
           console.log("URL does not match any supported platforms");
+          chrome.runtime.sendMessage({ type: 'openChatGPT', query: 'Hi' });
+          
       }
       
     }
+  //   else if (request.action === 'setTextarea') {
+  //     setTextareaValue(request.query);
+  // }
 });
 
 

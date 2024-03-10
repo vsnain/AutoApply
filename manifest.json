@@ -4,6 +4,7 @@
     "version": "1.0",
     "description": "x",
     "permissions": ["storage", "declarativeContent", "activeTab", "scripting","tabs"],
+    "host_permissions": ["https://chat.openai.com/*"],
     "action": {
       "default_popup": "popup.html"
     },

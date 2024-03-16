@@ -48,18 +48,36 @@ async function openIndeedJobInNewTab(jobElement) {
         if(applyButton.hasAttribute('href')) {
           jobTab.close();
         } else {
+          
           // const applyButton = jobTab.document.querySelector('[aria-label^="Apply now"]');
           await delay(500);
           await moveMouseTo(applyButton);
-          await new Promise(resolve => window.addEventListener('load', resolve));
-  
-          const continueButton = document.querySelector('button > span:contains("Continue")');
-          // while (continueButton){
-          //   await moveMouseTo(applyButton);
-          //   await new Promise(resolve => window.addEventListener('load', resolve));
-          //   const newButton = document.querySelector('button > span:contains("Continue")');
-          //   continueButton = newButton;
-          // }
+          
+          // await new Promise(resolve => window.addEventListener('load', resolve));
+          await delay(7000);
+          
+
+          console.log("Looking for Continue");
+          const continueButton = Array.from(jobTab.document.querySelectorAll('button'))
+            .find(button => {
+              console.log(button);
+              const spanElement = button.querySelector('span');
+              return spanElement && spanElement.textContent.trim() === 'Continue';
+            });
+
+          let counter = 0;
+          
+          console.log(continueButton);
+
+          
+          
+          while (continueButton && counter < 5) {
+              await moveMouseTo(applyButton);
+              await new Promise(resolve => setTimeout(resolve, 7000)); // Wait for some time (adjust as needed)
+              continueButton = Array.from(document.querySelectorAll('button')).find(button => button.textContent.trim() === 'Continue'); // Find the continue button again
+              counter++; // Increment the counter
+              console.log(continueButton);
+          }
         }
         
     } catch (error) {
@@ -150,7 +168,7 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
           
       } else {
           console.log("URL does not match any supported platforms");
-          chrome.runtime.sendMessage({ type: 'openChatGPT', query: 'Hi' });
+          chrome.runtime.sendMessage({ type: 'openChatGPT', query: query });
           
       }
       
@@ -160,6 +178,55 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
   // }
 });
 
+var query = `You are to become a keyword matcher. 
+I will give you a JD, and you have to match it against my resume. And for each JD that I give you, you have to match is with
+the resume I have given you. After matching, you MUST reply - "Score". Where 'Score' is the score you assign. 
+For each JD I give you, you match it with same exact resume, and you reply with a single sentence which I gave you. 
+Do not deviate from instructions. Always reply the score in mathematical form only. And score should be out of 100%. Note that 
+score is a variable that you assign, out of 100%. It is not a constant. It is a variable that you assign. 
+Here is my resume:
 
-
+Experience
+ Software Engineer April 2021 – October 2021 Scaler Remote
+• Engineered the topic exploration portal for Scaler’s learning platform, developing the backend schema and GraphQL API using NodeJS. The React SPA interface provided learners with pathways across 500+ technical courses
+• Built a contribution management platform using NodeJS, ExpressJS, and MongoDB, supporting authentication, payments,contribution management, for 700+ mentors/writers increasing contributor retention by more than 80%
+• Implemented data-driven optimization strategies using Python that analyzed traffic patterns and storing them on
+SQL server to strategically enhance content, driving a 200% increase in monthly users
+• Interviewed and onboarded over 150 part-time mentors(Big Tech Engineers), and built the content pipeline,
+growing website traffic 5x to 500k monthly users in 6 months
+Software Engineer January 2020 – March 2021
+Lido
+Remote
+• Architected a scalable single page application using ReactJS serving over 1 million users annually, reducing page loads by 50% through code splitting and lazy loading techniques
+• Developed and managed microservices using Node.js, GraphQL, and Kafka facilitating 10x growth in course enrollments with 99.99% uptime for a catalog of over 1000 online courses
+• Implemented OAuth 2.0 authentication and authorization for secure user access across web, mobile and API endpoints. Integrated OAuth providers like Google, Facebook with single sign-on
+Concierge - Part Time May 2022 – Jan 2024 SamsonShield Toronto
+• Effectively managed a building with 1500+ residents over the weekends, showcasing strong collaboration and communication skills in addressing residents’ needs and ensuring a welcoming environment
+Education
+Humber College - Information Technology
+Software Development Lifecycle, Agile, Scrum
+BML University - Bachelor of Computer Science, and Engineering
+Data Structures, Algorithms, Computer Architecture, Networks, Database, Functional Programming
+Projects
+Toronto, Canada
+2022 – 2023
+Gurugram, India
+2016 – 2020
+  Alpha - Status based social network - GitHub
+• Lead a team of 3 to design an intuitive UI using Android Studio connected to a robust backend built using Node.js
+• Implemented a flexible GraphQL API system for efficient data queries and minimal network overhead
+• Hardened Security with Google Sign-In, Auth0, JWT Tokens for bulletproof authentication
+• Engineered an anonymous posting feature supported by Google’s location services(Geolocation)
+• Automated deployment on Digital Ocean Cloud to provide 24/7 uptime. Uploaded the app on Google Play Store
+OmegaStock Pro
+• Crafted a stock market analysis platform, harmonizing Python’s data analytics with React.js user-friendly interface
+• Achieved a 4% boost in predictive accuracy through machine learning
+• Deployed REST APIs using FastAPI to power the React frontend with real-time market data updates
+Skills
+Languages: Java, Python, C, SQL (Postgres), JavaScript, HTML, CSS, TypeScript
+Frameworks: React, React Native, NodeJS, JUnit, FastAPI, MongoDB, PostgreSQL, Google Cloud, Amazon AWS Developer Tools: Git, Docker, Google Cloud, IntelliJ, Postman, Android Studio
+Other Skills: Attention to detail, Focus, Team Work, Problem Solving and Analytical Skills, Writing Skills
+Courses and Certifications
+Algorithms Specialization: Stanford University (Coursera - 12 weeks) Crafting Quality Code: University of Toronto (Coursera - 12 weeks)
+`;
 

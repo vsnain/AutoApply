@@ -42,32 +42,30 @@ chrome.runtime.onMessage.addListener(async ({type, url, query}, sender, sendResp
         console.log("Running background openChatGPT function");
         const chatGPTUrl = 'https://chat.openai.com/';
         const tab = await chrome.tabs.create({ url: chatGPTUrl });
-        
+        await new Promise(resolve => setTimeout(resolve, 7000));
         await executeScriptWithDelay(tab.id, setTextareaValue, query);
-        await executeScriptWithDelay(tab.id, fetchAndLogFirstParagraph, query);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        await executeScriptWithDelay(tab.id, fetchLastMessage, query);
         // chrome.tabs.sendMessage(tab.id, { action: 'setTextarea', query: query });
-        
     }
     
    
 });
 
 async function executeScriptWithDelay(tabId, func, ...args) {
-    await new Promise(resolve => setTimeout(resolve, 2000));
     await chrome.scripting.executeScript({
         target: { tabId: tabId },
         func: func,
         args: args
     });
-    await new Promise(resolve => setTimeout(resolve, 3000));
     console.log("Script done");
-
 }
 
 async function setTextareaValue(query) {
     
-    
+    console.log("Entered textareavalue script");
     const textarea = document.getElementById('prompt-textarea');
+    console.log(textarea);
     if (textarea) {
         
         textarea.value = query;
@@ -85,26 +83,30 @@ async function setTextareaValue(query) {
         // Dispatch the "Enter" key event on the textarea
         textarea.dispatchEvent(enterKeyEvent);
     }
+    else{
+        console.log("TextArea not found!");
+    }
 }
 
-async function fetchAndLogFirstParagraph(query) {
-    // Select the container element
-    const container = document.querySelector('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div');
+async function fetchLastMessage(query) {
+    
+    console.log("Entered Last message script");
+    const lastMessageElement = document.querySelector('[data-testid^="conversation-turn-"]:last-child');
+    // console.log(lastMessageElement);
 
-    // Check if the container element is found
-    if (container) {
-        // Find the first paragraph element within the container
-        const paragraph = container.querySelector('p');
-        
-        // Check if a paragraph element is found
-        if (paragraph) {
-            // Fetch the content of the paragraph
-            const paragraphContent = paragraph.innerText;
-            console.log('First paragraph content:', paragraphContent);
-        } else {
-            console.error('Paragraph element not found within the container.');
-        }
+    // Check if the element is found
+    if (lastMessageElement) {
+
+        const paragraphElement = lastMessageElement.querySelector('.text-message div.markdown.prose');
+
+        // Get the text content of the paragraph
+        const paragraphText = paragraphElement.textContent.trim();
+
+        console.log(paragraphText);
     } else {
-        console.error('Container element not found.');
+        
+        console.error('Last message element not found.');
+
     }
+
 }

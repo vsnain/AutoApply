@@ -6,7 +6,8 @@ module.exports = {
   entry: {
     background: './background.js',
     popup: './popup.js',
-    // Add more entry points for your extension scripts if needed
+    content: './content.js',
+    injectScript: './injectScript.js',
   },
   output: {
     filename: '[name].bundle.js',
@@ -16,7 +17,9 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: 'popup.html', to: 'popup.html' },
-        // Add more patterns for other static files (e.g., icons, manifest.json)
+        { from: 'manifest.json', to: 'manifest.json' },
+        { from: 'content.js', to: 'content.js' },
+        { from: 'injectScript.js', to: 'injectScript.js' }, // Copy content.bundle.js as content.js
       ],
     }),
   ],

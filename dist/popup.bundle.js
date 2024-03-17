@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",(function(){document.getElementById("start").addEventListener("click",(function(){console.log("Script Running"),chrome.tabs.query({active:!0,currentWindow:!0},(function(n){chrome.tabs.sendMessage(n[0].id,{action:"startExecution"},(function(n){console.log("Sending message")}))}))}))}));

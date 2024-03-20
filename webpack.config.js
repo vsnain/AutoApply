@@ -8,6 +8,7 @@ module.exports = {
     popup: './popup.js',
     content: './content.js',
     injectScript: './injectScript.js',
+    applyScript: './applyScript.js',
   },
   output: {
     filename: '[name].bundle.js',
@@ -19,7 +20,9 @@ module.exports = {
         { from: 'popup.html', to: 'popup.html' },
         { from: 'manifest.json', to: 'manifest.json' },
         { from: 'content.js', to: 'content.js' },
-        { from: 'injectScript.js', to: 'injectScript.js' }, // Copy content.bundle.js as content.js
+        { from: 'injectScript.js', to: 'injectScript.js' }, 
+        { from: 'applyScript.js', to: 'applyScript.js' }, 
+        
       ],
     }),
   ],

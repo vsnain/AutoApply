@@ -21,7 +21,7 @@ export async function openIndeedJobInNewTab(jobElement) {
 
       const jobUrl = jobAnchor.getAttribute('href');
       const jobTab = window.open(jobUrl, '_blank');
-      
+      await delay(2000);
       chrome.runtime.sendMessage({ type: 'openIndeedJob' });
       
       // Wait for a message from the background script indicating that the injected script has finished

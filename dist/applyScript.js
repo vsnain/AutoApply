@@ -1,0 +1,1 @@
+import{delay,moveMouseTo}from"./utils.js";async function clickApply(){const e=document.querySelector('[aria-label^="Apply now"]');console.log("applyScript running like crazy"),await new Promise((e=>setTimeout(e,2e3))),e&&!e.hasAttribute("href")&&(console.log("Clicking Apply"),await moveMouseTo(e),chrome.runtime.sendMessage({type:"injectScript"}))}clickApply();

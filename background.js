@@ -3,6 +3,8 @@ import { setTextareaValue, fetchLastMessage } from './chatgpt.js';
 
 let parentID;
 let appliedTabId;
+let injectedTabId = null;
+
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type === 'openJobTab') {
@@ -32,10 +34,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       if (tabs.length > 0) {
         const activeTab = tabs[0];
         const activeTabId = activeTab.id;
-        console.log('ID of active tab:', activeTabId);
-        console.log("ID of sender:", sender.tab.id);
+        
         // Execute the script in the active tab
-        appliedTabId = activeTabId;
+        // appliedTabId = activeTabId;
         chrome.scripting.executeScript({
           target: { tabId: activeTabId },
           files: ['./applyScript.bundle.js'],
@@ -50,22 +51,29 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   else if (message.type == "injectScript"){
     console.log("Received injectScript message");
     console.log('Sender vs stored appliedTab', sender.tab.id, appliedTabId);
+    appliedTabId = sender.tab.id;
+    
   }
   else if(message.type=="applied"){
-    console.log("Continue part done and applied job");
+    console.log("Applied job, closing job tab now");
+    injectedTabId = null;
+    chrome.tabs.remove(sender.tab.id);
     chrome.tabs.sendMessage(parentID, { type: 'injectedScriptFinished' });
     sendResponse({ success: true });
     return true;
   }
 });
 
-// Listen for tab updates to detect page navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tabId === appliedTabId) {
     console.log('Page navigation detected in applied tab, injecting injectScript.bundle.js');
+    
+    if (injectedTabId===null){
+    injectedTabId = appliedTabId;
     chrome.scripting.executeScript({
       target: { tabId: appliedTabId },
       files: ['./injectScript.bundle.js'],
     });
+  }
   }
 });

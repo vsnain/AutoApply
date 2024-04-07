@@ -1,68 +1,16 @@
-var simulateMouseEvent = function(element, eventName, coordX, coordY) {
-    element.dispatchEvent(new MouseEvent(eventName, {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-      clientX: coordX,
-      clientY: coordY,
-      button: 0
-    }));
-  };
+const continueButton = Array.from(document.querySelectorAll('button'))
+    .find(button => {
+      const spanElement = button.querySelector('span');
+      return spanElement && spanElement.textContent.trim() === 'Continue';
+    });
+
+  console.log("Script Still alive, continue part done");
+  const submitButton = Array.from(document.querySelectorAll('button'))
+    .find(button => {
+      const spanElement = button.querySelector('span');
+      return spanElement && spanElement.textContent.trim() === 'Submit your application';
+    });
   
-async function moveMouseTo(element) {
-    const rect = element.getBoundingClientRect();
-    const coordX = rect.left + (rect.right - rect.left) / 2;
-    const coordY = rect.top + (rect.bottom - rect.top) / 2;
-    
-    simulateMouseEvent(element, "mousedown", coordX, coordY);
-    simulateMouseEvent(element, "mouseup", coordX, coordY);
-    simulateMouseEvent(element, "click", coordX, coordY);
-}
-
-
-
-
-const url = applyButton.getAttribute('href');
-        // Check if the apply button exists
-        if (!applyButton) {
-            console.log('Apply button not found on the job listing page.');
-            return; // Exit the function
-        }
-
-        console.log(url);
-        
-
-        if (url.includes("indeed")) {
-            chrome.storage.local.set({ url });
-        
-            chrome.runtime.sendMessage({
-                type: 'openJobTab',
-                url
-            });
-        
-            // Define an async function to handle the tab loaded event
-            const handleTabLoaded = async (message, sender) => {
-                if (message.type === 'tabLoaded') {
-                    try {
-                        // Execute content script in the new tab to find the label element
-                        chrome.tabs.executeScript(sender.tab.id, {
-                            code: `document.querySelector('#ihl-useId-indeed-theme-provider-guwgai-1-file-resume > label')`
-                        }, function(results) {
-                            if (chrome.runtime.lastError) {
-                                console.error(chrome.runtime.lastError.message);
-                            } else {
-                                console.log('Label found:', results[0]);
-                                moveMouseTo(results[0]); // Call moveMouseTo without await
-                            }
-                        });
-                    } catch (error) {
-                        console.error('An error occurred:', error);
-                    }
-                }
-            };
-        
-            // Register the handleTabLoaded function as a listener for the tabLoaded event
-            chrome.runtime.onMessage.addListener(handleTabLoaded);
-        } else {
-            console.log("URL does not contain 'indeed'. Ignoring...");
-        }
+  await moveMouseTo(submitButton);
+  
+  chrome.runtime.sendMessage({ type: 'applied' });

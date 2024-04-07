@@ -9,6 +9,7 @@ async function clickApply() {
     if (applyButton && !applyButton.hasAttribute('href')) {
       console.log("Clicking Apply");
       await moveMouseTo(applyButton);
+      
       chrome.runtime.sendMessage({ type: 'injectScript' });
     }
 }

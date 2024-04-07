@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
         const jobElements = document.querySelectorAll('#mosaic-provider-jobcards > ul > li.css-5lfssm.eu4oa1w0');
         console.log(`Found ${jobElements.length} job elements`);
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < jobElements.length; i++) {
           const jobElement = jobElements[i];
           console.log(`Processing job element ${i + 1}/${jobElements.length}`);
           await moveMouseTo(jobElement);

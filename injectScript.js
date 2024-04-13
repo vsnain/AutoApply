@@ -1,18 +1,58 @@
 import { delay, moveMouseTo } from './utils.js';
 
 let flag = true;
-async function hitButton(query){
+async function hitButton(query) {
   let continueButton = Array.from(document.querySelectorAll('button'))
-  .find(button => {
-    const spanElement = button.querySelector('span');
-    return spanElement && spanElement.textContent.trim() === query;
-  });
+    .find(button => {
+      const spanElement = button.querySelector('span');
+      return spanElement && spanElement.textContent.trim() === query;
+    });
 
-  
-  if (continueButton){
+  if (continueButton) {
     await moveMouseTo(continueButton);
-  }
-  else{
+
+    const questionsContainer = document.querySelector('#ia-container > div > div.css-12qwcfa.eu4oa1w0 > div > div > div.css-w93e9b.e37uo190 > div.css-6e23tm.eu4oa1w0 > div > div > main > div.ia-BasePage-component.ia-BasePage-component--withContinue');
+
+    if (questionsContainer) {
+      let questionIndex = 0;
+      let currentQuestion = questionsContainer.querySelector(`#q_${questionIndex}`);
+
+      while (currentQuestion) {
+        const questionText = currentQuestion.querySelector('.css-12axhzd.e1wnkr790')?.textContent.trim();
+
+        // Handle empty box
+        const textAreaElement = currentQuestion.querySelector('textarea');
+        if (textAreaElement) {
+          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'textarea' });
+        }
+
+        // Handle dropdown
+        const selectElement = currentQuestion.querySelector('select');
+        if (selectElement) {
+          const options = Array.from(selectElement.options).map(option => option.textContent.trim());
+          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'dropdown', options });
+        }
+
+        // Handle radio buttons
+        const radioButtons = currentQuestion.querySelectorAll('input[type="radio"]');
+        if (radioButtons.length > 0) {
+          const options = Array.from(radioButtons).map(radio => radio.nextElementSibling.textContent.trim());
+          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'radio', options });
+        }
+
+        // Handle number input
+        const numberInput = currentQuestion.querySelector('input[type="number"]');
+        if (numberInput) {
+          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'number' });
+        }
+
+        questionIndex++;
+        currentQuestion = questionsContainer.querySelector(`#q_${questionIndex}`);
+      }
+    } else {
+      console.log('Questions container not found.');
+    }
+  } else {
     flag = false;
   }
 }

@@ -5,7 +5,6 @@ let parentID;
 let appliedTabId;
 let injectedTabId = null;
 
-
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type === 'openJobTab') {
     chrome.storage.local.get('url', async ({ url }) => {
@@ -61,6 +60,26 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     chrome.tabs.sendMessage(parentID, { type: 'injectedScriptFinished' });
     sendResponse({ success: true });
     return true;
+  }
+  else if (message.type === 'storeQuestion') {
+    const { question, answerType, options } = message;
+
+    chrome.storage.sync.get('questions', (data) => {
+      const questions = data.questions || [];
+
+      // Check if the question already exists
+      const existingQuestion = questions.find(q => q.question === question);
+      if (!existingQuestion) {
+        // Question doesn't exist, add it to the storage
+        const newQuestion = { question, answerType, options };
+        questions.push(newQuestion);
+        chrome.storage.sync.set({ questions }, () => {
+          console.log(`Question "${question}" stored in Chrome Storage.`);
+        });
+      } else {
+        console.log(`Question "${question}" already exists in Chrome Storage, skipping.`);
+      }
+    });
   }
 });
 

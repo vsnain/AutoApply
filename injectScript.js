@@ -9,8 +9,7 @@ async function hitButton(query) {
     });
 
   if (continueButton) {
-    await moveMouseTo(continueButton);
-
+    
     const questionsContainer = document.querySelector('#ia-container > div > div.css-12qwcfa.eu4oa1w0 > div > div > div.css-w93e9b.e37uo190 > div.css-6e23tm.eu4oa1w0 > div > div > main > div.ia-BasePage-component.ia-BasePage-component--withContinue');
 
     if (questionsContainer) {
@@ -23,27 +22,102 @@ async function hitButton(query) {
         // Handle empty box
         const textAreaElement = currentQuestion.querySelector('textarea');
         if (textAreaElement) {
-          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'textarea' });
+          const storedAnswer = textAreaElement.value.trim();
+          if (storedAnswer) {
+            // Answer is already filled, so we don't change it
+            console.log("Answer is there for text box");
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: storedAnswer, answerType: 'textarea' });
+          } else {
+            // Answer is not filled, so we use the default answer
+            const defaultAnswer = await getDefaultAnswer(questionText, 'textarea');
+            textAreaElement.value = defaultAnswer;
+            const inputEvent = new Event('input', { bubbles: true });
+            textAreaElement.dispatchEvent(inputEvent);
+            await delay(500);
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: defaultAnswer, answerType: 'textarea' });
+          }
+        }
+        const textElement = currentQuestion.querySelector('input[type="text"]');
+        if (textElement) {
+          const storedAnswer = textElement.value.trim();
+          if (storedAnswer) {
+            // Answer is already filled, so we don't change it
+            console.log("Answer is there for text box");
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: storedAnswer, answerType: 'textarea' });
+          } else {
+            // Answer is not filled, so we use the default answer
+            const defaultAnswer = await getDefaultAnswer(questionText, 'textarea');
+            textElement.value = defaultAnswer;
+            const inputEvent = new Event('input', { bubbles: true });
+            textElement.dispatchEvent(inputEvent);
+            await delay(500);
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: defaultAnswer, answerType: 'textarea' });
+          }
         }
 
         // Handle dropdown
         const selectElement = currentQuestion.querySelector('select');
         if (selectElement) {
           const options = Array.from(selectElement.options).map(option => option.textContent.trim());
-          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'dropdown', options });
+          const storedAnswer = selectElement.value;
+          if (storedAnswer) {
+            // Answer is already selected, so we don't change it
+            console.log("Answer is there for dropdown");
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: storedAnswer, answerType: 'dropdown', options });
+          } else {
+            // Answer is not selected, so we use the default answer
+            const defaultAnswer = await getDefaultDropdownAnswer(null, options);
+            selectElement.value = defaultAnswer;
+            const changeEvent = new Event('change', { bubbles: true });
+            selectElement.dispatchEvent(changeEvent);
+            await delay(500);
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: defaultAnswer, answerType: 'dropdown', options });
+          }
         }
 
         // Handle radio buttons
         const radioButtons = currentQuestion.querySelectorAll('input[type="radio"]');
         if (radioButtons.length > 0) {
           const options = Array.from(radioButtons).map(radio => radio.nextElementSibling.textContent.trim());
-          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'radio', options });
+          const storedAnswer = Array.from(radioButtons).find(radio => radio.checked)?.nextElementSibling.textContent.trim();
+          if (storedAnswer) {
+            // Answer is already selected, so we don't change it
+            console.log("Answer is there for radio");
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: storedAnswer, answerType: 'radio', options });
+          } else {
+            // Answer is not selected, so we use the default answer
+            const defaultAnswer = await getDefaultRadioAnswer(null, options);
+            console.log(defaultAnswer);
+            
+            const radioButton = Array.from(radioButtons).find(radio => radio.nextElementSibling.textContent.trim() === defaultAnswer);
+            if (radioButton) {
+              console.log("Attempting to click radio button");
+              await moveMouseTo(radioButton);
+              await delay(500);
+            }
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: defaultAnswer, answerType: 'radio', options });
+          }
         }
 
         // Handle number input
         const numberInput = currentQuestion.querySelector('input[type="number"]');
         if (numberInput) {
-          chrome.runtime.sendMessage({ type: 'storeQuestion', question: questionText, answerType: 'number' });
+          const storedAnswer = numberInput.value.trim();
+          if (storedAnswer) {
+            // Answer is already filled, so we don't change it
+            console.log("Answer is there for numerical box");
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: storedAnswer, answerType: 'number' });
+          } else {
+            // Answer is not filled, so we use the default answer
+            let defaultAnswer = await getDefaultNumericalAnswer(questionText, 'number');
+            defaultAnswer = parseInt(defaultAnswer);
+            numberInput.value = defaultAnswer;
+            const inputEvent = new Event('input', { bubbles: true });
+            numberInput.dispatchEvent(inputEvent);
+
+            await delay(500);
+            chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: defaultAnswer, answerType: 'number' });
+          }
         }
 
         questionIndex++;
@@ -52,26 +126,62 @@ async function hitButton(query) {
     } else {
       console.log('Questions container not found.');
     }
+    await moveMouseTo(continueButton);
   } else {
     flag = false;
   }
+}
+
+async function getDefaultAnswer(question, answerType) {
+  return "I'm a bot designed by Vikram, I couldn't figure out the answer to this question.";
+}
+
+async function getDefaultNumericalAnswer(question, answerType) {
+  return 2;
+}
+
+function getDefaultDropdownAnswer(storedAnswer, options) {
+  if (!storedAnswer) {
+    const defaultAnswers = ['Canada', 'Asian', 'Decline to answer', 'Asian (not Hispanic or Latino)','Canada(+1)'];
+    const match = defaultAnswers.find(answer => options.includes(answer));
+    return match || '';
+  }
+  return storedAnswer;
+}
+
+function getDefaultRadioAnswer(storedAnswer, options) {
+  if (!storedAnswer) {
+    const defaultAnswers = ['Yes', 'Male', 'Yes, I can make the commute', "No, I don't have a disability",'Decline to answer', 'Email me', 'Hybrid'];
+    const match = defaultAnswers.find(answer => options.includes(answer));
+    return match || '';
+  }
+  return storedAnswer;
 }
 
 async function applyForJob() {
   await delay(1500);
   console.log("injectScript INJECTED");
 
-  
-  const resumeFileInput = document.querySelector('[data-testid="FileResumeCard-input"]');
+  const resumeFileLabel = document.querySelector('[data-testid="FileResumeCard-label"]');
 
   // Check if the element is found
-  if (resumeFileInput) {
-      // If found, simulate a click event on the element
-      resumeFileInput.click();
-      console.log("Clicked on the resume file input:", resumeFileInput);
+  if (resumeFileLabel) {
+    // If found, simulate a click event on the element
+    resumeFileLabel.click();
+    console.log("Clicked on the resume file label:", resumeFileLabel);
   } else {
-      console.log("Resume file input not found.");
+    console.log("Resume file label not found.");
+    const resumeFileInput = document.querySelector('[data-testid="FileResumeCard-input"]');
+    // Check if the element is found
+    if (resumeFileInput) {
+        // If found, simulate a click event on the element
+        resumeFileInput.click();
+        console.log("Clicked on the resume file input:", resumeFileInput);
+    } else {
+        console.log("Resume file input not found.");
+    }
   }
+  
 
   let count = 0;
 

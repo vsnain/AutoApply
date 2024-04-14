@@ -5,9 +5,11 @@ import { openLinkedinJobInNewTab } from './linkedin.js';
 chrome.runtime.onMessage.addListener(async function(message, sender, sendResponse) {
   if (message.action === 'startExecution') {
     sendResponse({ success: true });
+    await delay(1500);
+
 
     const currentURL = window.location.href;
-
+    
     if (currentURL.includes("indeed")) {
       try {
         // Define the number of pages
@@ -31,7 +33,7 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
           if (nextPageLink) {
             console.log("Clicking 'Next Page' link");
             await moveMouseTo(nextPageLink);
-            await delay(1500); // Add a delay after clicking the link to allow the new page to load
+            chrome.runtime.sendMessage({ type: 'nextPageClicked' });
           } else {
             console.error("Next page link not found");
             break; // Exit the loop if the "Next Page" link is not found

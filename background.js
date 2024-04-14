@@ -1,9 +1,11 @@
-import { getActiveTab, openJobTab, executeScriptWithDelay } from './utils.js';
+import { getActiveTab, openJobTab, executeScriptWithDelay,delay } from './utils.js';
 import { setTextareaValue, fetchLastMessage } from './chatgpt.js';
+
 
 let parentID;
 let appliedTabId;
 let injectedTabId = null;
+let contentScriptInjected = false;
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type === 'openJobTab') {
@@ -12,12 +14,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       await openJobTab(url);
     });
   } else if (message.type === 'closeTab') {
-    const [tab] = await getActiveTab();
-    if (tab) {
-      chrome.tabs.remove(tab.id);
-    }
-  } else if (message.type === 'openChatGPT') {
-
+    chrome.tabs.remove(sender.tab.id);
+  }
+  else if (message.type === 'openChatGPT') {
     console.log("Running background openChatGPT function");
     const chatGPTUrl = 'https://chat.openai.com/';
     const tab = await chrome.tabs.create({ url: chatGPTUrl });
@@ -81,9 +80,14 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       }
     });
   }
+  else if (message.type === 'nextPageClicked') {
+    console.log("Next page clicked message received");
+    contentScriptInjected = true;
+  }
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+ 
   if (changeInfo.status === 'complete' && tabId === appliedTabId) {
     console.log('Page navigation detected in applied tab, injecting injectScript.bundle.js');
     
@@ -95,4 +99,17 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     });
   }
   }
+  else if (changeInfo.status === 'complete' && contentScriptInjected) {
+    console.log("Next page onUpdate running now");
+    // Reset the flag to false after injecting the script
+    contentScriptInjected = false;
+
+    console.log("Trying to inject content script again after next page");
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, { action: 'startExecution' }, function (response) {
+        console.log("Sending message");
+      });
+    });
+  }
 });
+

@@ -12,6 +12,9 @@ async function clickApply() {
       
       chrome.runtime.sendMessage({ type: 'injectScript' });
     }
+    else{
+      chrome.runtime.sendMessage({ type: 'applied' });
+    }
 }
   
 clickApply();

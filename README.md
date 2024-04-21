@@ -45,4 +45,4 @@ Start button pressed -> content.js injected
 ## Future functionality
 * Linkedin functionality
 * Saving questions into a database, asking the user for answers, and then giving those answers in applications
-* Using LLMs to answer questions, or to match JD against the resume(Apply jobs that are 80% match)
+* Using LLMs to answer questions, or to match JD against the resume(Apply jobs that are 80% match) https://github.com/xtekky/gpt4free

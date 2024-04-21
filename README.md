@@ -23,9 +23,9 @@ Search for a desired job on indeed.ca, and hit "start" button. If the code break
 
 ## Under construction
 
-* Linkedin functionality
-* Saving questions into a database, asking the user for answers, and then giving those answers in applications
-* Using LLMs to answer questions, or to match JD against the resume(Apply jobs that are 80% match)
+* questions.js : Grabs all the questions from indeed applications, asks the user to answer them, and then uses those answers for future applications. 
+* linkedin.js : Same functionality for linkedin easy apply jobs. 
+* chatgpt.js : Hard to implement(OpenAI has weird defenses). Wanted to open chatgpt, check the JD against the resume, and apply only if the JD is an 80% match. Maybe we can use an LLM API that is free?
 
 ## Bugs/Broken code
 
@@ -43,7 +43,6 @@ Start button pressed -> content.js injected
 
 
 ## Future functionality
-
-* questions.js : Grabs all the questions from indeed applications, asks the user to answer them, and then uses those answers for future applications. 
-* linkedin.js : Same functionality for linkedin easy apply jobs. 
-* chatgpt.js : Hard to implement(OpenAI has weird defenses). Wanted to open chatgpt, check the JD against the resume, and apply only if the JD is an 80% match. 
+* Linkedin functionality
+* Saving questions into a database, asking the user for answers, and then giving those answers in applications
+* Using LLMs to answer questions, or to match JD against the resume(Apply jobs that are 80% match)

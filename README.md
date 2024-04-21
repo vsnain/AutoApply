@@ -23,6 +23,7 @@ Search for a desired job on indeed.ca, and hit "start" button. If the code break
 
 * Linkedin functionality
 * Saving questions into a database, asking the user for answers, and then giving those answers in applications
+* Using LLMs to answer questions, or to match JD against the resume
 
 ## Bugs/Broken code
 

@@ -13,7 +13,9 @@ npm run build
 **If you want to edit and "refresh" the code**:
 npm run watch
 
+## Why a chrome extension?
 
+To avoid scraping, or detection, or IP ban. If 1000 users use a chrome extension, that's 1000 different IPs. Indeed can't detect all of them. 
 
 ## What works so far
 

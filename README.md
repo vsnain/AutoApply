@@ -17,7 +17,7 @@ npm run watch
 
 ## What works so far
 
-Search for a desired job on indeed.ca, and hit "start" button. If the code breaks, hit refresh the page and hit start again. 
+Search for a desired job on indeed.ca, and hit "start" button. If the code breaks, refresh the page and hit start again. 
 
 ## Under construction
 

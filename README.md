@@ -30,8 +30,6 @@ Search for a desired job on indeed.ca, and hit "start" button. If the code break
 
 ## Bugs/Broken code
 
-* Job already applied
-* Clicking on next page(Indeed next page arrow, which then changes the page and shows next 25 jobs i.e. page 2 of jobs) and injecting script again
 * Human captcha
 
 ## Code Logic

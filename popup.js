@@ -11,6 +11,18 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   });
+
+// Add event listener to the "Stop" button
+document.getElementById('stop').addEventListener('click', function() {
+  // Send message to the content script to stop execution
+  console.log("Stopping execution");
+  // chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+  //   chrome.tabs.sendMessage(tabs[0].id, { action: 'stopExecution' }, function(response) {
+  //     console.log("Sending stop message");
+  //   });
+  // });
+  chrome.runtime.sendMessage({ type: 'stopExecution' });
+});
   
 
 
@@ -36,3 +48,4 @@ document.getElementById('showQuestionsAndAnswers').addEventListener('click', () 
     });
   });
 });
+

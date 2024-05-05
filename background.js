@@ -27,24 +27,35 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
   } else if (message.type === 'openIndeedJob') {
     console.log("message.type == openIndeedJob");
-
+    parentID = sender.tab.id;
     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       if (tabs.length > 0) {
         const activeTab = tabs[0];
         const activeTabId = activeTab.id;
         
-        // Execute the script in the active tab
-        // appliedTabId = activeTabId;
-        chrome.scripting.executeScript({
-          target: { tabId: activeTabId },
-          files: ['./applyScript.bundle.js'],
-        });
-      } else {
+        const url = activeTab.url;
+        console.log(url);
+        if (url.includes("indeed")) {
+          chrome.scripting.executeScript({
+            target: { tabId: activeTabId },
+            files: ['./applyScript.bundle.js'],
+          });
+        }
+        
+        else{
+          console.log("Tab doesn't include indeed",activeTabId, parentID);
+          chrome.tabs.remove(activeTabId);
+          console.log("tab removed");
+          chrome.tabs.sendMessage(parentID, { type: 'injectedScriptFinished' });
+          sendResponse({ success: true });
+        }
+      }
+      else {
         console.error('No active tab found');
       }
     });
 
-    parentID = sender.tab.id;
+    
   }
   else if (message.type == "injectScript"){
     console.log("Received injectScript message");
@@ -84,22 +95,21 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     console.log("Next page clicked message received");
     contentScriptInjected = true;
   }
+  else if (message.type === 'stopExecution') {
+    console.log("Stopping the extension...");
+    // Terminate all content scripts directly (without cleanup.js)
+    chrome.tabs.sendMessage(parentID, { action: 'stopExecution' });
+    
+
+    // chrome.runtime.reload();
+
+  }
+    
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
- 
-  if (changeInfo.status === 'complete' && tabId === appliedTabId) {
-    console.log('Page navigation detected in applied tab, injecting injectScript.bundle.js');
-    
-    if (injectedTabId===null){
-    injectedTabId = appliedTabId;
-    chrome.scripting.executeScript({
-      target: { tabId: appliedTabId },
-      files: ['./injectScript.bundle.js'],
-    });
-  }
-  }
-  else if (changeInfo.status === 'complete' && contentScriptInjected) {
+
+  if (changeInfo.status === 'complete' && contentScriptInjected) {
     console.log("Next page onUpdate running now");
     // Reset the flag to false after injecting the script
     contentScriptInjected = false;
@@ -111,5 +121,17 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       });
     });
   }
+  else if (changeInfo.status === 'complete' && tabId === appliedTabId) {
+    console.log('Page navigation detected in applied tab, injecting injectScript.bundle.js');
+    
+    if (injectedTabId===null){
+    injectedTabId = appliedTabId;
+    chrome.scripting.executeScript({
+      target: { tabId: appliedTabId },
+      files: ['./injectScript.bundle.js'],
+    });
+  }
+  }
+  
 });
 

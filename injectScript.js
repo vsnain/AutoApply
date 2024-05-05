@@ -67,13 +67,29 @@ async function hitButton(query) {
           } else {
             // Answer is not selected, so we use the default answer
             const defaultAnswer = await getDefaultDropdownAnswer(null, options);
+
+            // Check the Canada one. 
+            
+          if (options.includes('Canada')) {
+            // Option "Canada" found, set it as selected
+            selectElement.value = '2'; // Assuming the value of Canada is '2'
+            // Dispatch a change event to simulate user interaction
+            const changeEvent = new Event('change', { bubbles: true });
+            selectElement.dispatchEvent(changeEvent);
+            await delay(500);
+          }
+          else{
             selectElement.value = defaultAnswer;
             const changeEvent = new Event('change', { bubbles: true });
             selectElement.dispatchEvent(changeEvent);
             await delay(500);
             chrome.runtime.sendMessage({ type: 'storeAnswer', question: questionText, answer: defaultAnswer, answerType: 'dropdown', options });
           }
+          }
         }
+        
+
+
 
         // Handle radio buttons
         const radioButtons = currentQuestion.querySelectorAll('input[type="radio"]');
@@ -133,7 +149,7 @@ async function hitButton(query) {
 }
 
 async function getDefaultAnswer(question, answerType) {
-  return "I'm a bot designed by Vikram, I couldn't figure out the answer to this question.";
+  return "github.com/vsnain/autoapply - I created the bot ";
 }
 
 async function getDefaultNumericalAnswer(question, answerType) {
@@ -142,7 +158,7 @@ async function getDefaultNumericalAnswer(question, answerType) {
 
 function getDefaultDropdownAnswer(storedAnswer, options) {
   if (!storedAnswer) {
-    const defaultAnswers = ['Canada', 'Asian', 'Decline to answer', 'Asian (not Hispanic or Latino)','Canada(+1)'];
+    const defaultAnswers = ['Canada', 'Asian', 'Decline to answer', 'Asian (not Hispanic or Latino)','Canada(+1)',"2"];
     const match = defaultAnswers.find(answer => options.includes(answer));
     return match || '';
   }

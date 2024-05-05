@@ -149,7 +149,7 @@ async function hitButton(query) {
 }
 
 async function getDefaultAnswer(question, answerType) {
-  return "Good question. Really good question. Thanks. -- github.com/vsnain/autoapply";
+  return "Good question, really good question, thanks. --github.com/vsnain/autoapply";
 }
 
 async function getDefaultNumericalAnswer(question, answerType) {

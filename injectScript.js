@@ -149,7 +149,7 @@ async function hitButton(query) {
 }
 
 async function getDefaultAnswer(question, answerType) {
-  return "github.com/vsnain/autoapply - I created the bot ";
+  return "Good question. Really good question. Thanks. -- github.com/vsnain/autoapply";
 }
 
 async function getDefaultNumericalAnswer(question, answerType) {
